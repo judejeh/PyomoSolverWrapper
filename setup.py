@@ -9,7 +9,7 @@
 from setuptools import setup
 
 setup(name='PyoSolveWrapper',
-      version='0.0.1',
+      version='0.0.2',
       description='Wrapper for Pyomo solve method',
       url='https://github.com/judejeh/OPPL_app',
       author='Jude Ejeh, Solomon F. Brown',
