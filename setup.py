@@ -18,7 +18,7 @@ setup(name='PyoSolveWrapper',
       python_requires='>=3.5',
       install_requires=[
           'pyomo == 5.6.8',
-          'pyomo.extras',
+          'numpy',
           'pyutilib == 5.7.3'
         ],
       classifiers=[
