@@ -17,10 +17,9 @@ setup(name='PyoSolveWrapper',
       license='MIT',
       python_requires='>=3.5',
       install_requires=[
-          'pyomo >= 5.6.8',
-          'pyomo <= 5.7.1',
+          'pyomo == 5.6.8',
           'numpy',
-          'pyutilib >= 5.7.3'
+          'pyutilib == 5.7.3'
         ],
       classifiers=[
         'Development Status :: 4 - Beta',
