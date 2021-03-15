@@ -16,7 +16,7 @@ git clone https://github.com/judejeh/PyomoSolverWrapper.git
 
 Change into the "PyomoSolverWrapper" directory created by Git or extracted from the downloaded zip file and run:
 ```
-python setup.py develop
+python setup.py install
 ```
 
 ## Usage
