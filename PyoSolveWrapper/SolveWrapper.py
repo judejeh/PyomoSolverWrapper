@@ -14,7 +14,6 @@ from itertools import chain
 from pyomo import version as pyoversion
 from numpy import array, zeros
 from pyomo.opt import SolverFactory, SolverManagerFactory
-import pyutilib.services
 
 
 class SolverWrapper:
@@ -239,6 +238,14 @@ class SolverWrapper:
         else:
             self.__pemsg("The right version of pyutilib could not be installed.")
 
+    def __set_tempdir(self, folder):
+        if self.pyomo_version <= '5.7.1':
+            from pyutilib.services import TempfileManager
+            TempfileManager.tempdir = folder
+        else:
+            from pyomo.common.tempfiles import TempfileManager
+            TempfileManager.tempdir = folder
+
     def __get_set_list(self, pyo_obj):
         if self.pyomo_version < '5.7.0'[:len(self.pyomo_version)]:
             return [set for set in pyo_obj._index.set_tuple]
@@ -311,7 +318,7 @@ class SolverWrapper:
         if self.solver_name in ['gurobi', 'baron', 'cplex']:
             if not path.exists(log_folder):
                 makedirs(log_folder)
-            pyutilib.services.TempfileManager.tempdir = log_folder
+            self.__set_tempdir(log_folder)
         else:
             pass
 
@@ -362,6 +369,7 @@ class SolverWrapper:
         # Solve <model> with/without writing final solution to stdout
         processed_results = None
         try:
+
             if self.neos:
                 self.solver_results = SolverManagerFactory('neos').solve(model, opt=opt_solver,
                                                                          tee=self.solver_progress)
@@ -403,7 +411,10 @@ class SolverWrapper:
             if not path.exists(results_store_folder):
                 makedirs(results_store_folder)
 
-            model.solutions.store_to(self.solver_results)  # define solutions storage folder
+            if self.pyomo_version <= '5.7.1':
+                model.solutions.store_to(self.solver_results)  # define solutions storage folder
+            else:
+                pass
             self.current_datetime_str = datetime.now().strftime("%d_%m_%y_%H_%M_")
             file_suffix = 0
             # Results filename
@@ -463,12 +474,22 @@ class SolverWrapper:
                 final_result['solver']['gap'] = None
 
             # Check state of available solution
-            try:
-                for key, value in final_result['solver_results_def']['Solution'][0]['Objective'].items():
-                    objective_value = value['Value']
-                final_result['solution_status'] = True
-            except:
-                final_result['solution_status'] = False
+            if self.pyomo_version < '5.7.1':
+                try:
+                    for key, value in final_result['solver_results_def']['Solution'][0]['Objective'].items():
+                        objective_value = value['Value']
+                    final_result['solution_status'] = True
+                except:
+                    final_result['solution_status'] = False
+                    objective_value = 'Unk'
+            else:
+                try:
+                    objective_value = model.solutions.solutions[0]._entry['objective'][
+                        list(model.solutions.solutions[0]._entry['objective'].keys())[0]][1]['Value']
+                    final_result['solution_status'] = True
+                except:
+                    final_result['solution_status'] = False
+                    objective_value = 'Unk'
 
             if self.return_solution and final_result['solution_status']:
                 # True: include values of all model objects in 'final_result'
@@ -549,8 +570,7 @@ class SolverWrapper:
                 # Variables
                 final_result['variables'] = dict()
                 # Include objective functionv value
-                for key, value in final_result['solver_results_def']['Solution'][0]['Objective'].items():
-                    final_result['variables']['Objective'] = value['Value']
+                final_result['variables']['Objective'] = objective_value
                 if self.verbosity:
                     print('\nProcessing results of variables . . . ')
                 else:
