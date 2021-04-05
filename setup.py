@@ -11,7 +11,7 @@ from setuptools import setup
 setup(name='PyoSolveWrapper',
       version='0.2.0',
       description='Wrapper for Pyomo solve method',
-      url='https://github.com/judejeh/OPPL_app',
+      url='https://github.com/judejeh/PyomoSolverWrapper',
       author='Jude Ejeh, Solomon F. Brown',
       author_email='j.ejeh@sheffield.ac.uk',
       license='MIT',
