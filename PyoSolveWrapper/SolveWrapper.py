@@ -474,15 +474,22 @@ class SolverWrapper:
                 final_result['solver']['gap'] = None
 
             # Check state of available solution
-            try:
-                for key, value in final_result['solver_results_def']['Solution'][0]['Objective'].items():
-                    objective_value = value['Value']
-                final_result['solution_status'] = True
-            except:
-                final_result['solution_status'] = False
-                objective_value = 'Unk'
-                if self.pyomo_version > '5.7.1':
-                    final_result['solution_status'] = True  # FIXME: Find solution location in pyomo objects
+            if self.pyomo_version < '5.7.1':
+                try:
+                    for key, value in final_result['solver_results_def']['Solution'][0]['Objective'].items():
+                        objective_value = value['Value']
+                    final_result['solution_status'] = True
+                except:
+                    final_result['solution_status'] = False
+                    objective_value = 'Unk'
+            else:
+                try:
+                    objective_value = model.solutions.solutions[0]._entry['objective'][
+                        list(model.solutions.solutions[0]._entry['objective'].keys())[0]][1]['Value']
+                    final_result['solution_status'] = True
+                except:
+                    final_result['solution_status'] = False
+                    objective_value = 'Unk'
 
             if self.return_solution and final_result['solution_status']:
                 # True: include values of all model objects in 'final_result'
