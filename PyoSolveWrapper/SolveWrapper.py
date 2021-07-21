@@ -279,15 +279,16 @@ class SolverWrapper:
         self.solver_name = self.solver_name.lower()
 
         # Confirm solver paths and thus availability
-        if self.solver_path is False:
-            if self.constants.os_name == 'Windows':
-                self.solver_path, self.solver_avail = \
-                    self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][0])
+        if not self.neos:
+            if self.solver_path is False:
+                if self.constants.os_name == 'Windows':
+                    self.solver_path, self.solver_avail = \
+                        self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][0])
+                else:
+                    self.solver_path, self.solver_avail = \
+                        self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][1])
             else:
-                self.solver_path, self.solver_avail = \
-                    self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][1])
-        else:
-            self.solver_avail = path.exists(self.solver_path)
+                self.solver_avail = path.exists(self.solver_path)
 
         # NEOS vs local solvers: check solvers are recognised/available
         if self.neos:  # using NEOS
