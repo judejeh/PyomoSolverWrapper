@@ -9,7 +9,7 @@
 from setuptools import setup
 
 setup(name='PyoSolveWrapper',
-      version='0.2.0',
+      version='0.2.1',
       description='Wrapper for Pyomo solve method',
       url='https://github.com/judejeh/PyomoSolverWrapper',
       author='Jude Ejeh, Solomon F. Brown',
