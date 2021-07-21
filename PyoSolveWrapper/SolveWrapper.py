@@ -48,7 +48,7 @@ class SolverWrapper:
                 'time_limit': 1200,
                 'threads': 2,
                 'neos': False,
-                'verbosity': True,
+                'verbosity': False,
                 'debug_mode': False,
                 'solver_progress': True,
                 'write_solution': True,
@@ -201,7 +201,10 @@ class SolverWrapper:
         Custom status messages to print to stdout and stop execution
         :param message: Error message to be printed
         """
-        self.__msg("INFO:", *msg, text_indent=1)
+        if self.verbosity:
+            self.__msg("INFO:", *msg, text_indent=1)
+        else:
+            pass
 
     def __page_borders(self, bottom=False):
         if self.verbosity:
