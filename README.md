@@ -43,6 +43,7 @@ Solver.solver_path = '<PATH_TO_SOLVER>'
 Note that whatever solver supplied should be compatible with Pyomo.
 
 Where solvers are not locally installed, optimisation models may be solved using the [NEOS server](https://neos-server.org/neos/) if doing so for non-commercial purposes.
+Note that for now, results are not post-processed.
 
 **Finally**, the model can be solved as:
 ```

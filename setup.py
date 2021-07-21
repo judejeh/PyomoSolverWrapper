@@ -6,14 +6,16 @@
 # Copyright 2021 The Pyomo Solver Wrapper authors <https://github.com/judejeh>
 # ---------------------------------------------------------------------------------
 
-from setuptools import setup
+from distutils.core import setup
 
 setup(name='PyoSolveWrapper',
-      version='0.2.1',
+      packages=['PyoSolveWrapper'],
+      version='0.3.0',
       description='Wrapper for Pyomo solve method',
       url='https://github.com/judejeh/PyomoSolverWrapper',
+      download_url='https://github.com/judejeh/PyomoSolverWrapper/archive/refs/tags/v0.3.0.tar.gz',
       author='Jude Ejeh, Solomon F. Brown',
-      author_email='j.ejeh@sheffield.ac.uk',
+      author_email='joe@judejeh.com',
       license='MIT',
       python_requires='>=3.5',
       install_requires=[
