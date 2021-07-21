@@ -7,7 +7,7 @@
 # ---------------------------------------------------------------------------------
 
 import re, sys, platform, textwrap, subprocess
-from os import path, makedirs, system
+from os import path, makedirs, system, environ
 from datetime import datetime
 from itertools import chain
 
@@ -74,7 +74,7 @@ class SolverWrapper:
 
     def __init__(self, solver_name=None, solver_path=None, time_limit=None, threads=None, neos=None, verbosity=None,
                  debug_mode=None, solver_progress=None, write_solution=None, write_solution_to_stdout=None,
-                 return_solution=None, rel_gap=None, result_precision=None):
+                 return_solution=None, rel_gap=None, result_precision=None, neos_registered_email=None):
         # Set methods defaults
         self.solver_info = self.__SolversInfo()
         self.constants = self.__Constants()
@@ -103,6 +103,26 @@ class SolverWrapper:
         self.pyutilib_version = self.__get_pkg_version("PyUtilib")
         self.dependency_check_count = 1
         self.dependency_check = self.__pyutilib_dependency_check()
+        self.__DEF_registered_email = "pyosolvewrapper@gmail.com"
+        self.__DEF_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        self.neos_registered_email = neos_registered_email
+        self.neos_registered_email = self.__sg_neos_registered_email(defaults=False)
+
+    def __sg_neos_registered_email(self, defaults=True):
+        if self.neos_registered_email is None:
+            if defaults:
+                self.__msg("NB: An email address can be passed to 'neos_registered_email' instead of using defaults.")
+            self.neos_registered_email = self.__DEF_registered_email
+            return self.neos_registered_email
+        else:
+            if re.match(self.__DEF_REGEX, self.neos_registered_email):
+                return self.neos_registered_email
+            else:
+                self.__msg("An invalid email address was passed. Resorting to default...")
+                self.neos_registered_email = None
+                self.__sg_neos_registered_email(defaults=False)   # Tiny way to avoid repeated warnings to users
+                return self.neos_registered_email
+
 
     def __apattr(self, attrib, value):
         """
@@ -145,7 +165,7 @@ class SolverWrapper:
         else:
             pass
 
-    def __msg(self, *msg, text_indent):
+    def __msg(self, *msg, text_indent=4):
         text_indent = " " * int(text_indent)
         # Text wrapper function
         wrapper = textwrap.TextWrapper(width=60, initial_indent=text_indent, subsequent_indent=text_indent)
@@ -163,7 +183,10 @@ class SolverWrapper:
         :param message: Error message to be printed
         """
 
-        exit = self.debug_mode
+        if self.debug_mode:
+            exit = self.debug_mode
+        else:
+            exit = exit
 
         text_indent = self.__msg(*msg, text_indent=4)
 
@@ -178,7 +201,16 @@ class SolverWrapper:
         Custom status messages to print to stdout and stop execution
         :param message: Error message to be printed
         """
-        text_indent = self.__msg(*msg, text_indent=1)
+        self.__msg("INFO:", *msg, text_indent=1)
+
+    def __page_borders(self, bottom=False):
+        if self.verbosity:
+            if bottom:
+                self.__msg("- - " * 15, "\n", text_indent=0)
+            else:
+                self.__msg("- - " * 15, text_indent=0)
+        else:
+            pass
 
     def __run_ext_command(self, cmd=[" "]):
         return subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
@@ -239,6 +271,11 @@ class SolverWrapper:
             self.__pemsg("The right version of pyutilib could not be installed.")
 
     def __set_tempdir(self, folder):
+        """
+        Set temporary solver folder
+        :param folder: path to folder
+        :return:
+        """
         if self.pyomo_version <= '5.7.1':
             from pyutilib.services import TempfileManager
             TempfileManager.tempdir = folder
@@ -258,43 +295,22 @@ class SolverWrapper:
         else:
             return [set.name for set in pyo_obj.domain.subsets()]
 
-
-    def solve_model(self, model):
+    def __solvers_compatibility_check(self):
         """
-        Method to solve an optimization model using a specified solver
-        Returns:
-            :dict - solver statistics and model solution
+        NEOS vs local solvers: Check solvers are recognised/available
+        :return:
         """
-
-        # Set a few default values
-        vars_to_check = ['solver_name', 'neos', 'write_solution', 'return_solution', 'verbosity', 'solver_progress']
-        for var in vars_to_check:
-            self.__chkattrt(var)
-
-        # Get model name
-        model_name = model.name
-        self.model_name_str = str(re.sub(" ", "_", model_name))
-
-        # Solver name to lower case characters
-        self.solver_name = self.solver_name.lower()
-
-        # Confirm solver paths and thus availability
-        if self.solver_path is False:
-            if self.constants.os_name == 'Windows':
-                self.solver_path, self.solver_avail = \
-                    self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][0])
-            else:
-                self.solver_path, self.solver_avail = \
-                    self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][1])
-        else:
-            self.solver_avail = path.exists(self.solver_path)
-
-        # NEOS vs local solvers: check solvers are recognised/available
         if self.neos:  # using NEOS
             if self.solver_name not in self.solver_info.neos_compatible:
                 self.__pemsg("NEOS server does not seem to be configure for " + str(self.solver_name),
-                            "If you must used this solver, install a local version and set option 'neos' to 'False'")
+                             "If you must used this solver, install a local version and set option 'neos' to 'False'",
+                             exit=False)
+                self.__pemsg("Attempting to use a local solver instance . . .", exit=False)
+                self.neos = False
+                self.__solvers_path_check()
+                self.__solvers_compatibility_check()
             else:
+                environ['NEOS_EMAIL'] = self.__sg_neos_registered_email()
                 if self.verbosity:
                     self.__psmsg("Using NEOS server to solve model . . .")
                 else:
@@ -309,6 +325,50 @@ class SolverWrapper:
                     self.__psmsg("Solver located in {}".format(self.solver_path))
                 else:
                     pass
+
+    def __solvers_path_check(self):
+        """
+        # Confirm solver paths and thus availability
+        :return:
+        """
+        if not self.neos:
+            if self.solver_path is False:
+                if self.constants.os_name == 'Windows':
+                    self.solver_path, self.solver_avail = \
+                        self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][0])
+                else:
+                    self.solver_path, self.solver_avail = \
+                        self.__get_solver_path(self.solver_info.configured_solvers[self.solver_name][1])
+            else:
+                self.solver_avail = path.exists(self.solver_path)
+        else:
+            self.solver_avail = False
+
+
+    def solve_model(self, model):
+        """
+        Method to solve an optimization model using a specified solver
+        Returns:
+            :dict - solver statistics and model solution
+        """
+
+        # Set a few default values
+        attr_to_check = ['solver_name', 'neos', 'write_solution', 'return_solution', 'verbosity', 'solver_progress']
+        for attr in attr_to_check:
+            self.__chkattrt(attr)
+
+        # Get model name
+        model_name = model.name
+        self.model_name_str = str(re.sub(" ", "_", model_name))
+
+        # Solver name to lower case characters
+        self.solver_name = self.solver_name.lower()
+
+        # NEOS vs local solvers: check solvers are recognised/available
+        self.__solvers_compatibility_check()   # Run solvers check
+
+        # Confirm solver paths and thus availability
+        self.__solvers_path_check
 
         # Call solver factory
         opt_solver = SolverFactory(self.solver_name)
@@ -368,8 +428,8 @@ class SolverWrapper:
 
         # Solve <model> with/without writing final solution to stdout
         processed_results = None
+        self.__page_borders()   # Headers for page
         try:
-
             if self.neos:
                 self.solver_results = SolverManagerFactory('neos').solve(model, opt=opt_solver,
                                                                          tee=self.solver_progress)
@@ -378,12 +438,17 @@ class SolverWrapper:
                                                        logfile=log_store_folder + log_filename)
 
             # Process results obtained
-            processed_results = self._process_solver_results(model)
+            if self.neos:
+                self.__msg("Currently, results are not post-processed for NEOS server runs")  #FIXME Find a work around
+            else:
+                processed_results = self._process_solver_results(model)
         except ValueError:
             self.__psmsg("Something went wrong with the solver")
 
         # Return model solution and solver statistics
         self.final_results = processed_results
+
+        self.__page_borders(bottom=True)   # Footer for page
 
     # Method for post processing solver results
     def _process_solver_results(self, model):
