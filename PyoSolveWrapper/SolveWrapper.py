@@ -97,12 +97,12 @@ class SolverWrapper:
         self.result_precision = self.__apattr(result_precision, self.constants.var_defaults['result_precision'])
 
         # Set other defaults
-        self.model_name_str = None
-        self.current_datetime_str = None
-        self.pyomo_version = pyoversion.version
-        self.pyutilib_version = self.__get_pkg_version("PyUtilib")
-        self.dependency_check_count = 1
-        self.dependency_check = self.__pyutilib_dependency_check()
+        self.__model_name_str = None
+        self.__current_datetime_str = None
+        self.__pyomo_version = pyoversion.version
+        self.__pyutilib_version = self.__get_pkg_version("PyUtilib")
+        self.__dependency_check_count = 1
+        self.__dependency_check = self.__pyutilib_dependency_check()
         self.__DEF_registered_email = "pyosolvewrapper@gmail.com"
         self.__DEF_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         self.neos_registered_email = neos_registered_email
@@ -245,31 +245,31 @@ class SolverWrapper:
             return None
 
     def __pyutilib_dependency_check(self):
-        if self.dependency_check_count <= 3:
-            if self.pyomo_version == '5.6.8':
-                if '5.7.3' not in self.pyutilib_version:
+        if self.__dependency_check_count <= 3:
+            if self.__pyomo_version == '5.6.8':
+                if '5.7.3' not in self.__pyutilib_version:
                     system('pip install pyutilib==5.7.3')
-                    self.pyutilib_version = self.__get_pkg_version("PyUtilib")
-                    self.dependency_check_count += 1
+                    self.__pyutilib_version = self.__get_pkg_version("PyUtilib")
+                    self.__dependency_check_count += 1
                     self.__pyutilib_dependency_check()
                 else:
-                    self.dependency_check = True
-            elif self.pyomo_version == '5.6.9':
-                if '5.8.0' not in self.pyutilib_version:
+                    self.__dependency_check = True
+            elif self.__pyomo_version == '5.6.9':
+                if '5.8.0' not in self.__pyutilib_version:
                     system('pip install pyutilib==5.8.0')
-                    self.pyutilib_version = self.__get_pkg_version("PyUtilib")
-                    self.dependency_check_count += 1
+                    self.__pyutilib_version = self.__get_pkg_version("PyUtilib")
+                    self.__dependency_check_count += 1
                     self.__pyutilib_dependency_check()
                 else:
-                    self.dependency_check = True
-            elif self.pyomo_version > '5.6.9':
-                if '6.0.0' not in self.pyutilib_version:
+                    self.__dependency_check = True
+            elif self.__pyomo_version > '5.6.9':
+                if '6.0.0' not in self.__pyutilib_version:
                     system('pip install pyutilib==6.0.0')
-                    self.pyutilib_version = self.__get_pkg_version("PyUtilib")
-                    self.dependency_check_count += 1
+                    self.__pyutilib_version = self.__get_pkg_version("PyUtilib")
+                    self.__dependency_check_count += 1
                     self.__pyutilib_dependency_check()
                 else:
-                    self.dependency_check = True
+                    self.__dependency_check = True
         else:
             self.__pemsg("The right version of pyutilib could not be installed.")
 
@@ -279,7 +279,7 @@ class SolverWrapper:
         :param folder: path to folder
         :return:
         """
-        if self.pyomo_version <= '5.7.1':
+        if self.__pyomo_version <= '5.7.1':
             from pyutilib.services import TempfileManager
             TempfileManager.tempdir = folder
         else:
@@ -287,13 +287,13 @@ class SolverWrapper:
             TempfileManager.tempdir = folder
 
     def __get_set_list(self, pyo_obj):
-        if self.pyomo_version < '5.7.0'[:len(self.pyomo_version)]:
+        if self.__pyomo_version < '5.7.0'[:len(self.__pyomo_version)]:
             return [set for set in pyo_obj._index.set_tuple]
         else:
             return [set.name for set in pyo_obj._index.subsets()]
 
     def __get_set_list_alt(self, pyo_obj):
-        if self.pyomo_version < '5.7.0'[:len(self.pyomo_version)]:
+        if self.__pyomo_version < '5.7.0'[:len(self.__pyomo_version)]:
             return [set for set in pyo_obj.domain.set_tuple]
         else:
             return [set.name for set in pyo_obj.domain.subsets()]
@@ -362,7 +362,7 @@ class SolverWrapper:
 
         # Get model name
         model_name = model.name
-        self.model_name_str = str(re.sub(" ", "_", model_name))
+        self.__model_name_str = str(re.sub(" ", "_", model_name))
 
         # Solver name to lower case characters
         self.solver_name = self.solver_name.lower()
@@ -412,22 +412,22 @@ class SolverWrapper:
 
         # Write log to file named <model_name>/DD_MM_YY_HH_MM_xx.log
         # Create (if it does not exist) the '_log' folder
-        log_store_folder = path.join(log_folder, self.model_name_str, '')
+        log_store_folder = path.join(log_folder, self.__model_name_str, '')
         if not path.exists(log_store_folder):
             makedirs(log_store_folder)
 
-        self.current_datetime_str = datetime.now().strftime("%d_%m_%y_%H_%M_")
+        self.__current_datetime_str = datetime.now().strftime("%d_%m_%y_%H_%M_")
         file_suffix = 0
         # Results filename
-        if self.model_name_str == 'Unknown' or len(self.model_name_str) <= 10:
-            log_filename = self.model_name_str + self.current_datetime_str + str(file_suffix) + ".log"
+        if self.__model_name_str == 'Unknown' or len(self.__model_name_str) <= 10:
+            log_filename = self.__model_name_str + self.__current_datetime_str + str(file_suffix) + ".log"
         else:
-            log_filename = self.model_name_str[:4] + '..' + self.model_name_str[-4:] + \
-                           self.current_datetime_str + str(file_suffix) + ".log"
+            log_filename = self.__model_name_str[:4] + '..' + self.__model_name_str[-4:] + \
+                           self.__current_datetime_str + str(file_suffix) + ".log"
         while path.exists(log_store_folder + log_filename):
             file_suffix += 1
-            log_filename = self.current_datetime_str + str(file_suffix) + ".log"
-        log_filename = self.current_datetime_str + str(file_suffix) + ".log"
+            log_filename = self.__current_datetime_str + str(file_suffix) + ".log"
+        log_filename = self.__current_datetime_str + str(file_suffix) + ".log"
 
         # Solve <model> with/without writing final solution to stdout
         processed_results = None
@@ -475,27 +475,27 @@ class SolverWrapper:
 
             # Write solution to file named <model_name>/DD_MM_YY_HH_MM_xx.json
             # Create (if it does not exist) the '_results_store' folder
-            results_store_folder = path.join('_results_store', self.model_name_str, '')
+            results_store_folder = path.join('_results_store', self.__model_name_str, '')
             if not path.exists(results_store_folder):
                 makedirs(results_store_folder)
 
-            if self.pyomo_version <= '5.7.1':
+            if self.__pyomo_version <= '5.7.1':
                 model.solutions.store_to(self.solver_results)  # define solutions storage folder
             else:
                 pass
-            self.current_datetime_str = datetime.now().strftime("%d_%m_%y_%H_%M_")
+            self.__current_datetime_str = datetime.now().strftime("%d_%m_%y_%H_%M_")
             file_suffix = 0
             # Results filename
-            if self.model_name_str == 'Unknown' or len(self.model_name_str) <= 10:
-                result_filename = self.model_name_str + self.current_datetime_str + str(
+            if self.__model_name_str == 'Unknown' or len(self.__model_name_str) <= 10:
+                result_filename = self.__model_name_str + self.__current_datetime_str + str(
                     file_suffix) + ".json"
             else:
-                result_filename = self.model_name_str[:4] + '..' + self.model_name_str[-4:] + \
-                                  self.current_datetime_str + str(file_suffix) + ".json"
+                result_filename = self.__model_name_str[:4] + '..' + self.__model_name_str[-4:] + \
+                                  self.__current_datetime_str + str(file_suffix) + ".json"
             while path.exists(results_store_folder + result_filename):
                 file_suffix += 1
-                result_filename = self.current_datetime_str + str(file_suffix) + ".json"
-            result_filename = self.current_datetime_str + str(file_suffix) + ".json"
+                result_filename = self.__current_datetime_str + str(file_suffix) + ".json"
+            result_filename = self.__current_datetime_str + str(file_suffix) + ".json"
             self.solver_results.write(filename=results_store_folder + result_filename, format="json")
         else:
             pass
@@ -542,7 +542,7 @@ class SolverWrapper:
                 final_result['solver']['gap'] = None
 
             # Check state of available solution
-            if self.pyomo_version < '5.7.1':
+            if self.__pyomo_version < '5.7.1':
                 try:
                     for key, value in final_result['solver_results_def']['Solution'][0]['Objective'].items():
                         objective_value = value['Value']
@@ -625,7 +625,7 @@ class SolverWrapper:
                                         # print(par_set_lens)
                                         # print(par_set_list)
                                         # print(par_object_dim)
-                                        if self.pyomo_version < '5.7':  # FIXME: Better way to do this?
+                                        if self.__pyomo_version < '5.7':  # FIXME: Better way to do this?
                                             final_result['parameters'][par][i - 1][j - 1] = par_object[i, j]
                                         else:
                                             final_result['parameters'][par][ind] = par_object[i, j]
@@ -680,7 +680,7 @@ class SolverWrapper:
                                         for ind, (i, j) in enumerate(getattr(model, str(set))):
                                             # print(type(final_result['variables'][variable]),final_result['variables'][variable])
                                             # print(i,j,final_result['variables'][variable][i-1][j-1])
-                                            if self.pyomo_version < '5.7':  # FIXME: Better way to do this?
+                                            if self.__pyomo_version < '5.7':  # FIXME: Better way to do this?
                                                 final_result['variables'][variable][i - 1][j - 1] = variable_object[i, j].value
                                             else:
                                                 final_result['variables'][variable][ind] = variable_object[i, j].value
