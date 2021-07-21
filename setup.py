@@ -9,11 +9,11 @@
 from setuptools import setup
 
 setup(name='PyoSolveWrapper',
-      version='0.2.1',
+      version='0.3.0',
       description='Wrapper for Pyomo solve method',
       url='https://github.com/judejeh/PyomoSolverWrapper',
       author='Jude Ejeh, Solomon F. Brown',
-      author_email='j.ejeh@sheffield.ac.uk',
+      author_email='joe@judejeh.com',
       license='MIT',
       python_requires='>=3.5',
       install_requires=[
