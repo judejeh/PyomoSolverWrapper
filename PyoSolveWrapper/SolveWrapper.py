@@ -367,11 +367,11 @@ class SolverWrapper:
         # Solver name to lower case characters
         self.solver_name = self.solver_name.lower()
 
+        # Confirm solver paths and thus availability
+        self.__solvers_path_check()
+
         # NEOS vs local solvers: check solvers are recognised/available
         self.__solvers_compatibility_check()   # Run solvers check
-
-        # Confirm solver paths and thus availability
-        self.__solvers_path_check
 
         # Call solver factory
         opt_solver = SolverFactory(self.solver_name)
