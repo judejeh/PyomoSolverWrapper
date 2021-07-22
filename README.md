@@ -9,7 +9,12 @@ A third-party python-based solver wrapper for [Pyomo](http://www.pyomo.org/about
 
 ## Installation
 
-The package can be installed directly by downloading an appropriate release or cloning the main development repository from GitHub:
+The package can be installed using the command:
+```
+pip install PyoSolveWrapper
+```
+
+Also by directly downloading an appropriate release or cloning the main development repository from GitHub:
 ```
 git clone https://github.com/judejeh/PyomoSolverWrapper.git
 ```
@@ -22,7 +27,7 @@ python setup.py install
 ## Usage
 Import the solve wrapper:
 ```
-from PyoSolveWrapper import SolverWrapper as slw 
+import PyoSolveWrapper as slw 
 ```
 This package solely aids the optimisation model solve process. Hence, having created an appropriate pyomo model object (further referred to as 'model'), an instance of the solver wrapper is first created:
 ```
