@@ -10,7 +10,7 @@ from distutils.core import setup
 
 setup(name='PyoSolveWrapper',
       packages=['PyoSolveWrapper'],
-      version='0.3.0',
+      version='0.3.1',
       description='Wrapper for Pyomo solve method',
       url='https://github.com/judejeh/PyomoSolverWrapper',
       download_url='https://github.com/judejeh/PyomoSolverWrapper/archive/refs/tags/v0.3.0.tar.gz',
