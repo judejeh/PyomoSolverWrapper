@@ -6,14 +6,19 @@
 # Copyright 2021 The Pyomo Solver Wrapper authors <https://github.com/judejeh>
 # ---------------------------------------------------------------------------------
 
-from distutils.core import setup
+from setuptools import setup
+
+with open("README.md", "r", encoding="utf-8") as rdm:
+    long_description = rdm.read()
 
 setup(name='PyoSolveWrapper',
       packages=['PyoSolveWrapper'],
       version='0.3.1',
       description='Wrapper for Pyomo solve method',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
       url='https://github.com/judejeh/PyomoSolverWrapper',
-      download_url='https://github.com/judejeh/PyomoSolverWrapper/archive/refs/tags/v0.3.0.tar.gz',
+      download_url='https://github.com/judejeh/PyomoSolverWrapper/archive/refs/tags/v0.3.1.tar.gz',
       author='Jude Ejeh, Solomon F. Brown',
       author_email='joe@judejeh.com',
       license='MIT',
