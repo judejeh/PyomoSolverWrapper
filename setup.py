@@ -13,7 +13,7 @@ with open("README.md", "r", encoding="utf-8") as rdm:
 
 setup(name='PyoSolveWrapper',
       packages=['PyoSolveWrapper'],
-      version='0.3.1',
+      version='0.3.2',
       description='Wrapper for Pyomo solve method',
       long_description=long_description,
       long_description_content_type="text/markdown",
