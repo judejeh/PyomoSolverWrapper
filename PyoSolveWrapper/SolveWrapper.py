@@ -322,7 +322,12 @@ class SolverWrapper:
             if self.solver_name not in self.solver_info.configured_solvers.keys():
                 self.__pemsg(self.solver_name + " is not amongst those currently configured by this package")
             elif not self.solver_avail:
-                self.__pemsg(self.solver_name + " is not installed or at the path specified")
+                if self.solver_path is False:
+                    self.__pemsg(self.solver_name + " is not installed or at the path specified")
+                else:
+                    self.solver_path = False
+                    self.__solvers_path_check()
+                    self.__solvers_compatibility_check()
             else:
                 if self.verbosity:
                     self.__psmsg("Solver located in {}".format(self.solver_path))
