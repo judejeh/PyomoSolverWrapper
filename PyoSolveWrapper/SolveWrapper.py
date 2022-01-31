@@ -30,7 +30,9 @@ class SolverWrapper:
                 'glpk': ['glpk', 'glpk', 'lp'],
                 'gurobi': ['gurobi', 'gurobi.sh', 'python'],    # Configure gurobi to use python api?
                 'baron': ['baron', 'baron', 'nl'],
-                'ipopt': ['ipopt', 'ipopt', 'lp']
+                'ipopt': ['ipopt', 'ipopt', 'lp'],
+                'couenne': ['couenne', 'couenne', 'nl'],
+                'bonmin': ['bonmin', 'bonmin', 'nl']
                 }
             self.neos_compatible = ['bonmin', 'cbc', 'conopt', 'couenne', 'cplex', 'filmint', 'filter', 'ipopt',
                                     'knitro', 'l-bfgs-b', 'lancelot', 'lgo', 'loqo', 'minlp', 'minos', 'minto',
@@ -322,7 +324,12 @@ class SolverWrapper:
             if self.solver_name not in self.solver_info.configured_solvers.keys():
                 self.__pemsg(self.solver_name + " is not amongst those currently configured by this package")
             elif not self.solver_avail:
-                self.__pemsg(self.solver_name + " is not installed or at the path specified")
+                if self.solver_path is False:
+                    self.__pemsg(self.solver_name + " is not installed or at the path specified")
+                else:
+                    self.solver_path = False
+                    self.__solvers_path_check()
+                    self.__solvers_compatibility_check()
             else:
                 if self.verbosity:
                     self.__psmsg("Solver located in {}".format(self.solver_path))
@@ -407,6 +414,21 @@ class SolverWrapper:
         elif self.solver_name in ['glpk']:
             opt_solver.options['mipgap'] = self.rel_gap
             opt_solver.options['tmlim'] = self.time_limit
+        elif self.solver_name in ['ipopt']:
+            opt_solver.options['max_wall_time'] = self.time_limit
+        elif self.solver_name in ['bonmin']:
+            opt_solver.options['time_limit'] = self.time_limit
+            opt_solver.options['number_cpx_threads'] = self.threads
+            opt_solver.options['allowable_fraction_gap'] = self.rel_gap
+        elif self.solver_name in ['couenne']:
+            opt_solver.options['time_limit'] = self.time_limit
+            opt_solver.options['threads'] = self.threads
+            opt_solver.options['ratio'] = self.rel_gap
+            opt_solver.options['seconds'] = self.time_limit
+            opt_solver.options['log'] = int(self.solver_progress) * 2
+            opt_solver.options['mess'] = 'on'
+            opt_solver.options['timeM'] = "elapsed"
+            opt_solver.options['preprocess'] = "equal"
         else:
             pass
 

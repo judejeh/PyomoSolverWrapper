@@ -22,7 +22,7 @@ def single_floor_MILP_model(model_data):
     # Create concrete model
     model = ConcreteModel('layout98 model')
 
-    # Define model sets
+    # Define model setsy
     model.i = Set(initialize=model_data['items'], doc='items', ordered=1)
     model.j = Set(within=model.i, initialize=model_data['items'], doc='other items', ordered=1)
     model.ij = Set(within=model.i*model.j, initialize=model_data['connected_items'], doc='connected items')
