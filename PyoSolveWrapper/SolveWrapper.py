@@ -30,7 +30,9 @@ class SolverWrapper:
                 'glpk': ['glpk', 'glpk', 'lp'],
                 'gurobi': ['gurobi', 'gurobi.sh', 'python'],    # Configure gurobi to use python api?
                 'baron': ['baron', 'baron', 'nl'],
-                'ipopt': ['ipopt', 'ipopt', 'lp']
+                'ipopt': ['ipopt', 'ipopt', 'lp'],
+                'couenne': ['couenne', 'couenne', 'nl'],
+                'bonmin': ['bonmin', 'bonmin', 'nl']
                 }
             self.neos_compatible = ['bonmin', 'cbc', 'conopt', 'couenne', 'cplex', 'filmint', 'filter', 'ipopt',
                                     'knitro', 'l-bfgs-b', 'lancelot', 'lgo', 'loqo', 'minlp', 'minos', 'minto',
