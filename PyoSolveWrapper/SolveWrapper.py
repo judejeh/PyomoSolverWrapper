@@ -414,6 +414,21 @@ class SolverWrapper:
         elif self.solver_name in ['glpk']:
             opt_solver.options['mipgap'] = self.rel_gap
             opt_solver.options['tmlim'] = self.time_limit
+        elif self.solver_name in ['ipopt']:
+            opt_solver.options['max_wall_time'] = self.time_limit
+        elif self.solver_name in ['bonmin']:
+            opt_solver.options['time_limit'] = self.time_limit
+            opt_solver.options['number_cpx_threads'] = self.threads
+            opt_solver.options['allowable_fraction_gap'] = self.rel_gap
+        elif self.solver_name in ['couenne']:
+            opt_solver.options['time_limit'] = self.time_limit
+            opt_solver.options['threads'] = self.threads
+            opt_solver.options['ratio'] = self.rel_gap
+            opt_solver.options['seconds'] = self.time_limit
+            opt_solver.options['log'] = int(self.solver_progress) * 2
+            opt_solver.options['mess'] = 'on'
+            opt_solver.options['timeM'] = "elapsed"
+            opt_solver.options['preprocess'] = "equal"
         else:
             pass
 
