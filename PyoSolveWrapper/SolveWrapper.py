@@ -557,9 +557,14 @@ class SolverWrapper:
                 final_result['solver']['cpu_time'] = None
 
             try:
-                final_result['solver']['gap'] = round(
-                    (self.solver_results.problem.Upper_bound - self.solver_results.problem.Lower_bound) \
-                    * 100 / self.solver_results.problem.Upper_bound, 2)
+                if self.solver_results.problem.Upper_bound == 0 and self.solver_results.problem.Lower_bound == 0:
+                    final_result['solver']['gap'] = 0
+                elif self.solver_results.problem.Upper_bound == 0:
+                    final_result['solver']['gap'] = abs(round(self.solver_results.problem.Lower_bound, 2))
+                else:
+                    final_result['solver']['gap'] = abs(round(
+                        (self.solver_results.problem.Upper_bound - self.solver_results.problem.Lower_bound) \
+                        * 100 / self.solver_results.problem.Upper_bound, 2))
             except AttributeError:
                 final_result['solver']['gap'] = None
 
